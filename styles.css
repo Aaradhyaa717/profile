@@ -1,0 +1,287 @@
+/* ---------------------------------------------------------
+   Aria Gyawali — portfolio
+   Color system: Flexoki (https://stephango.com/flexoki)
+   Layout/voice inspired by stephango.com
+--------------------------------------------------------- */
+
+:root {
+  /* base / neutrals */
+  --paper:    #FFFCF0;
+  --base-50:  #F2F0E5;
+  --base-100: #E6E4D9;
+  --base-150: #DAD8CE;
+  --base-200: #CECDC3;
+  --base-300: #B7B5AC;
+  --base-500: #878580;
+  --base-600: #6F6E69;
+  --base-700: #575653;
+  --base-850: #343331;
+  --base-900: #282726;
+  --base-950: #1C1B1A;
+  --black:    #100F0F;
+
+  /* accent */
+  --cyan:   #24837B;
+  --cyan-2: #3AA99F;
+
+  /* semantic, light mode default */
+  --bg: var(--paper);
+  --bg-2: var(--base-50);
+  --text: var(--black);
+  --text-muted: var(--base-600);
+  --text-faint: var(--base-300);
+  --border: var(--base-150);
+  --accent: var(--cyan);
+
+  --content-width: 660px;
+  --font-serif: ui-serif, Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+html.dark {
+  --bg: var(--black);
+  --bg-2: var(--base-950);
+  --text: var(--base-200);
+  --text-muted: var(--base-500);
+  --text-faint: var(--base-700);
+  --border: var(--base-850);
+  --accent: var(--cyan-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) {
+    --bg: var(--black);
+    --bg-2: var(--base-950);
+    --text: var(--base-200);
+    --text-muted: var(--base-500);
+    --text-faint: var(--base-700);
+    --border: var(--base-850);
+    --accent: var(--cyan-2);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+h1 { font-size: 2rem; margin: 0 0 0.3em; }
+h2 { font-size: 1.4rem; margin: 0 0 0.9em; padding-top: 0.2em; }
+h3 { font-size: 1.05rem; margin: 0; }
+
+p { margin: 0 0 1.1em; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+a:hover, a:focus-visible {
+  border-bottom-color: var(--accent);
+}
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+ul { padding-left: 0; margin: 0 0 1.1em; list-style: none; }
+
+.link-list li {
+  padding: 0.25em 0;
+  border-bottom: 1px dashed var(--border);
+}
+.link-list li:last-child { border-bottom: none; }
+
+/* ---------- header / nav ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 1.1em 1.25em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.wordmark {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+  border-bottom: none;
+}
+.wordmark:hover { color: var(--accent); }
+
+.nav-links {
+  display: flex;
+  gap: 1.1em;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+}
+.nav-links a {
+  color: var(--text-muted);
+}
+.nav-links a:hover {
+  color: var(--accent);
+}
+
+.theme-toggle {
+  width: 30px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  position: relative;
+  cursor: pointer;
+  flex: none;
+  padding: 0;
+}
+.theme-toggle-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.15s ease;
+}
+html.dark .theme-toggle-dot {
+  transform: translateX(12px);
+}
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) .theme-toggle-dot {
+    transform: translateX(12px);
+  }
+}
+
+/* ---------- layout ---------- */
+
+main {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 0 1.25em;
+}
+
+.section {
+  padding: 3em 0;
+  border-bottom: 1px solid var(--border);
+}
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.hero {
+  padding-top: 3.5em;
+}
+
+.eyebrow {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.6em;
+}
+
+/* ---------- entries (experience / research / projects) ---------- */
+
+.entry {
+  margin-bottom: 2.2em;
+}
+.entry:last-child {
+  margin-bottom: 0;
+}
+
+.entry-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4em 1em;
+  margin-bottom: 0.15em;
+}
+
+.entry-date {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.entry-sub {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  margin: 0.1em 0 0.7em;
+}
+
+.thesis-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 0.9em;
+}
+
+.subsection-title {
+  margin-top: 2.6em;
+  margin-bottom: 1.2em;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ---------- footer ---------- */
+
+.site-footer {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  padding: 2.5em 1.25em 4em;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+.site-footer a {
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--text-faint);
+}
+.site-footer a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 540px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.6rem; }
+  .nav { flex-wrap: wrap; }
+  .nav-links { gap: 0.8em; font-size: 0.88rem; }
+  .entry-head { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  body, .theme-toggle-dot { transition: none; }
+}
