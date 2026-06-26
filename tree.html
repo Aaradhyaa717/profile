@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Behavioral Divergence Tree</title>
+  <style>
+    :root {
+      --paper: #fffcf0;
+      --paper-2: #f7f0dd;
+      --panel: rgba(255, 252, 240, 0.74);
+      --panel-strong: #fffaf3;
+      --ink: #100f0f;
+      --body-text: #34312b;
+      --muted: #6f6a60;
+      --faint: #dad4c4;
+      --line: #c8bfae;
+
+      --green: #66800b;
+      --green-soft: #eef2d3;
+      --blue: #205ea6;
+      --blue-soft: #e6eef8;
+      --red: #af3029;
+      --red-soft: #f7e6e3;
+      --orange: #bc5215;
+      --orange-soft: #faead8;
+      --purple: #5e409d;
+      --purple-soft: #eee9fb;
+      --cyan: #24837b;
+      --cyan-soft: #e2f1ef;
+      --pink: #a02f6f;
+      --pink-soft: #f7e3ed;
+
+      --content-width: 1280px;
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+      --shadow-soft: 0 12px 42px rgba(16, 15, 15, 0.045);
+      --shadow-strong: 0 28px 80px rgba(47, 42, 36, 0.08);
+
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Georgia, "Times New Roman", serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 6%, rgba(32, 94, 166, 0.08), transparent 25rem),
+        radial-gradient(circle at 92% 12%, rgba(102, 128, 11, 0.08), transparent 26rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: inherit;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--serif);
+      font-weight: 500;
+      letter-spacing: -0.055em;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin-bottom: 22px;
+      font-size: clamp(3rem, 9vw, 7.4rem);
+      line-height: 0.91;
+      letter-spacing: -0.075em;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 5vw, 4.4rem);
+      line-height: 0.94;
+    }
+
+    h3 {
+      line-height: 1.02;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      position: relative;
+      margin: 0 0 10px;
+      padding-left: 19px;
+      color: var(--body-text);
+    }
+
+    li::before {
+      content: "";
+      position: absolute;
+      top: 0.68em;
+      left: 0;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.55;
+    }
+
+    body > section,
+    main,
+    footer,
+    .site-header {
+      width: min(var(--content-width), calc(100vw - 40px));
+      margin-inline: auto;
+    }
+
+    body > section {
+      padding: 72px 0;
+    }
+
+    body > section:first-of-type {
+      padding-top: 72px;
+    }
+
+    body > section:last-of-type {
+      padding-bottom: 96px;
+    }
+
+    main {
+      padding: 72px 0 96px;
+    }
+
+    footer {
+      padding: 0 0 42px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+    }
+
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--faint);
+    }
+
+    .brand {
+      font-family: var(--serif);
+      font-size: clamp(1.05rem, 1vw + 0.9rem, 1.35rem);
+      letter-spacing: -0.02em;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav a {
+      text-decoration: none;
+    }
+
+    .nav a:hover {
+      color: var(--ink);
+    }
+
+    .hero {
+      max-width: 850px;
+      margin-bottom: 72px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--ink);
+    }
+
+    .lede {
+      max-width: 720px;
+      color: var(--body-text);
+      font-size: clamp(1.05rem, 1vw + 0.85rem, 1.38rem);
+      line-height: 1.55;
+    }
+
+    .small-note {
+      max-width: 740px;
+      margin-top: 24px;
+      padding-left: 18px;
+      border-left: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+      margin: 0 0 34px;
+      padding-top: 36px;
+      border-top: 1px solid var(--faint);
+    }
+
+    body > section:first-of-type .section-head {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .section-number {
+      padding-top: 10px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .section-copy {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .tree-wrap {
+      overflow-x: auto;
+      padding: 22px;
+      border: 1px solid rgba(47, 42, 36, 0.12);
+      border-radius: var(--radius-lg);
+      background: var(--panel);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .tree {
+      display: block;
+      min-width: 1250px;
+      width: 100%;
+      height: auto;
+    }
+
+    .node,
+    .diamond {
+      stroke-width: 2.2;
+      filter: drop-shadow(0 10px 20px rgba(47, 42, 36, 0.08));
+    }
+
+    .node {
+      fill: #fffaf0;
+      stroke: #b7ad9a;
+    }
+
+    .node-soft {
+      fill: #f6f1e9;
+      stroke: #b8afa3;
+    }
+
+    .diamond {
+      fill: var(--panel-strong);
+      stroke: #b8afa3;
+    }
+
+    .connector,
+    .connector-dash {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      marker-end: url(#arrow);
+    }
+
+    .connector-dash {
+      stroke-dasharray: 8 8;
+      opacity: 0.65;
+    }
+
+    .node-title {
+      fill: var(--ink);
+      font-family: var(--sans);
+      font-size: 21px;
+      font-weight: 760;
+      letter-spacing: -0.015em;
+    }
+
+    .node-sub {
+      fill: var(--muted);
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 460;
+      letter-spacing: -0.02em;
+    }
+
+    .label,
+    .label-text {
+      fill: #766d63;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .label-bg {
+      fill: var(--panel-strong);
+      stroke: #e2d8cb;
+      stroke-width: 1.2;
+    }
+
+    .persona-grid,
+    .insight-grid,
+    .signal-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .persona-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .insight-grid,
+    .signal-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card,
+    .insight,
+    .signal {
+      border-radius: var(--radius-md);
+    }
+
+    .card,
+    .insight {
+      border: 1px solid var(--faint);
+      background: rgba(255, 252, 240, 0.7);
+    }
+
+    .card {
+      position: relative;
+      min-height: 470px;
+      padding: 26px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.62), transparent 52%);
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-top {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--faint);
+    }
+
+    .card h3 {
+      margin: 0 0 7px;
+      font-size: 1.62rem;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border: 1px solid currentColor;
+      border-radius: 50%;
+      background: rgba(255, 252, 240, 0.7);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+    }
+
+    .tag,
+    .outcome {
+      border: 1px solid rgba(16, 15, 15, 0.08);
+      background: rgba(255, 255, 255, 0.64);
+      color: var(--body-text);
+      font-family: var(--mono);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 5px 10px 6px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mini-heading,
+    .insight .kicker {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .mini-heading {
+      margin: 18px 0 9px;
+    }
+
+    .outcome {
+      margin-top: 22px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .green {
+      color: var(--green);
+      background: linear-gradient(180deg, var(--green-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .blue {
+      color: var(--blue);
+      background: linear-gradient(180deg, var(--blue-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .red {
+      color: var(--red);
+      background: linear-gradient(180deg, var(--red-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .orange {
+      color: var(--orange);
+      background: linear-gradient(180deg, var(--orange-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .purple {
+      color: var(--purple);
+      background: linear-gradient(180deg, var(--purple-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .pink {
+      color: var(--pink);
+      background: linear-gradient(180deg, var(--pink-soft), rgba(255, 252, 240, 0.75));
+    }
+
+    .insight {
+      padding: 22px;
+    }
+
+    .insight .kicker {
+      margin-bottom: 14px;
+      letter-spacing: 0.08em;
+    }
+
+    .insight p,
+    .signal p {
+      margin: 0;
+    }
+
+    .insight p {
+      color: var(--body-text);
+    }
+
+    .signal {
+      min-height: 134px;
+      padding: 18px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .signal h3 {
+      margin: 0 0 10px;
+      color: #d6d0c0;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      letter-spacing: 0.02em;
+    }
+
+    .signal p {
+      font-size: 0.98rem;
+      line-height: 1.42;
+    }
+
+    @media (max-width: 900px) {
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      body > section,
+      main {
+        padding-block: 56px;
+      }
+
+      .section-head {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .persona-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .insight-grid,
+      .signal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body > section,
+      main,
+      footer,
+      .site-header {
+        width: min(var(--content-width), calc(100vw - 32px));
+      }
+
+      .tree-wrap {
+        padding: 12px;
+        border-radius: 20px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body > section,
+      main {
+        padding-block: 48px;
+      }
+
+      .hero {
+        margin-bottom: 40px;
+      }
+
+      .insight-grid,
+      .signal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+</style>
+</head>
+<body>
+  <section id="tree" aria-labelledby="tree-heading">
+    <div class="section-head">
+      <div class="section-number">01 / Flow</div>
+      <div>
+        <h2 id="tree-heading">Behavioral divergence tree</h2>
+        <p class="section-copy">The completed tree maps the full offboarded lifecycle: quiet exit, public grievance, formal appeal, reinstatement, denial, repeated escalation, evasion-oriented re-entry, re-ban loops, and post-reinstatement behavior.</p>
+      </div>
+    </div>
+
+    <div class="tree-wrap" role="img" aria-label="Flowchart showing paths from banned user to post-ban personas">
+      <svg class="tree" viewBox="0 0 1900 1880" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L10,4 L0,8 Z" fill="#b8afa3" />
+          </marker>
+        </defs>
+
+        <!-- connectors: first split -->
+        <path class="connector" d="M900 118 L900 130" />
+        <path class="connector" d="M600 190 L260 190 L260 315" />
+        <path class="connector" d="M900 250 L900 315" />
+
+        <!-- connectors: no-appeal lane -->
+        <path class="connector" d="M260 395 L260 430 L200 430 L200 485" />
+        <path class="connector" d="M260 430 L510 430 L510 485" />
+
+        <!-- connectors: appeal lane -->
+        <path class="connector" d="M900 405 L900 450" />
+        <path class="connector" d="M1130 520 L1300 520" />
+        <path class="connector" d="M900 590 L900 645" />
+
+        <!-- connectors: reinstated lane -->
+        <path class="connector" d="M1480 565 L1480 650" />
+        <path class="connector" d="M1480 790 L1480 830 L1300 830 L1300 870" />
+        <path class="connector" d="M1480 830 L1700 830 L1700 870" />
+
+        <!-- connectors: denied lane -->
+        <path class="connector" d="M900 730 L900 1060" />
+        <path class="connector" d="M560 1135 L300 1135 L300 1300" />
+        <path class="connector" d="M900 1210 L900 1300" />
+        <path class="connector" d="M1240 1135 L1450 1135 L1450 1300" />
+        <path class="connector" d="M1450 1450 L1450 1520" />
+        <path class="connector" d="M1225 1585 L1260 1585 L1260 1710" />
+        <path class="connector" d="M1675 1585 L1635 1585 L1635 1710" />
+
+        <!-- feedback loops kept on the outside so they do not crowd the reading path -->
+        <path class="connector-dash" d="M670 1370 L585 1370 L585 690 L715 690" />
+        <path class="connector-dash" d="M510 625 L510 660 L760 660" />
+        <path class="connector-dash" d="M1635 1710 L1840 1710 L1840 55 L1000 55" />
+
+        <!-- start -->
+        <rect class="node node-soft" x="690" y="35" width="420" height="83" rx="18" />
+        <text class="node-title" x="900" y="70" text-anchor="middle">Banned user</text>
+        <text class="node-sub" x="900" y="96" text-anchor="middle">account suspended · reason unclear or disputed</text>
+
+        <!-- first decision -->
+        <polygon class="diamond" points="900,130 1200,190 900,250 600,190" fill="#fffaf3" stroke="#b8afa3" />
+        <text class="node-title" x="900" y="183" text-anchor="middle">Do they appeal?</text>
+        <text class="node-sub" x="900" y="207" text-anchor="middle">first response to ban</text>
+
+        <g>
+          <rect class="label-bg" x="385" y="154" width="150" height="30" rx="15" />
+          <text class="label-text" x="460" y="174" text-anchor="middle">no formal appeal</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="922" y="271" width="58" height="30" rx="15" />
+          <text class="label-text" x="951" y="291" text-anchor="middle">yes</text>
+        </g>
+
+        <!-- no appeal branch -->
+        <rect class="node node-soft" x="80" y="315" width="360" height="80" rx="16" />
+        <text class="node-title" x="260" y="348" text-anchor="middle">No formal appeal</text>
+        <text class="node-sub" x="260" y="373" text-anchor="middle">two common responses</text>
+
+        <g>
+          <rect class="label-bg" x="148" y="437" width="104" height="30" rx="15" />
+          <text class="label-text" x="200" y="457" text-anchor="middle">quiet exit</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="433" y="437" width="154" height="30" rx="15" />
+          <text class="label-text" x="510" y="457" text-anchor="middle">public grievance</text>
+        </g>
+
+        <rect class="node" x="40" y="485" width="320" height="140" rx="18" fill="#faead8" stroke="#bc5215" />
+        <text class="node-title" x="200" y="523" text-anchor="middle" fill="#7b3a0d">Give up-er</text>
+        <text class="node-sub" x="200" y="551" text-anchor="middle">accepts or avoids the fight</text>
+        <text class="node-sub" x="200" y="576" text-anchor="middle">moves to other apps</text>
+        <text class="node-sub" x="200" y="601" text-anchor="middle">or leaves app dating</text>
+
+        <rect class="node" x="360" y="485" width="300" height="140" rx="18" fill="#e6eef8" stroke="#205ea6" />
+        <text class="node-title" x="510" y="523" text-anchor="middle" fill="#164b83">Perpetual victim</text>
+        <text class="node-sub" x="510" y="551" text-anchor="middle">shares grievance stories</text>
+        <text class="node-sub" x="510" y="576" text-anchor="middle">feels wronged by process</text>
+        <text class="node-sub" x="510" y="601" text-anchor="middle">may later appeal or drift</text>
+
+        <!-- appeal branch -->
+        <rect class="node node-soft" x="680" y="315" width="440" height="90" rx="16" />
+        <text class="node-title" x="900" y="351" text-anchor="middle">Appeal submitted</text>
+        <text class="node-sub" x="900" y="378" text-anchor="middle">email · in-app form · complaint channel</text>
+
+        <polygon class="diamond" points="900,450 1130,520 900,590 670,520" fill="#fffaf3" stroke="#b8afa3" />
+        <text class="node-title" x="900" y="513" text-anchor="middle">Appeal approved?</text>
+        <text class="node-sub" x="900" y="538" text-anchor="middle">platform decision</text>
+
+        <g>
+          <rect class="label-bg" x="1194" y="484" width="58" height="30" rx="15" />
+          <text class="label-text" x="1223" y="504" text-anchor="middle">yes</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="922" y="609" width="54" height="30" rx="15" />
+          <text class="label-text" x="949" y="629" text-anchor="middle">no</text>
+        </g>
+
+        <!-- yes branch -->
+        <rect class="node" x="1300" y="475" width="360" height="90" rx="18" fill="#eef2d3" stroke="#66800b" />
+        <text class="node-title" x="1480" y="512" text-anchor="middle" fill="#43550a">Reinstated account</text>
+        <text class="node-sub" x="1480" y="539" text-anchor="middle">ban is reversed or lifted</text>
+
+        <polygon class="diamond" points="1480,650 1740,720 1480,790 1220,720" fill="#fffaf3" stroke="#b8afa3" />
+        <text class="node-title" x="1480" y="714" text-anchor="middle">Behavior after return?</text>
+        <text class="node-sub" x="1480" y="739" text-anchor="middle">trust rebuilt or fear remains</text>
+
+        <g>
+          <rect class="label-bg" x="1190" y="815" width="220" height="30" rx="15" />
+          <text class="label-text" x="1300" y="835" text-anchor="middle">cooperative caution</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="1602" y="815" width="196" height="30" rx="15" />
+          <text class="label-text" x="1700" y="835" text-anchor="middle">defensive caution</text>
+        </g>
+
+        <rect class="node" x="1130" y="870" width="340" height="130" rx="18" fill="#eef2d3" stroke="#66800b" />
+        <text class="node-title" x="1300" y="908" text-anchor="middle" fill="#43550a">Back in the app</text>
+        <text class="node-sub" x="1300" y="937" text-anchor="middle">more careful, but</text>
+        <text class="node-sub" x="1300" y="962" text-anchor="middle">not necessarily evasive</text>
+
+        <rect class="node" x="1535" y="870" width="330" height="150" rx="18" fill="#fff5e2" stroke="#bc5215" />
+        <text class="node-title" x="1700" y="908" text-anchor="middle" fill="#7b3a0d">Post-ban shadow</text>
+        <text class="node-sub" x="1700" y="937" text-anchor="middle">rapid unmatching</text>
+        <text class="node-sub" x="1700" y="962" text-anchor="middle">self-censorship</text>
+        <text class="node-sub" x="1700" y="987" text-anchor="middle">fear of re-reporting</text>
+
+        <!-- denied branch -->
+        <rect class="node node-soft" x="700" y="645" width="400" height="85" rx="16" />
+        <text class="node-title" x="900" y="680" text-anchor="middle">Appeal denied</text>
+        <text class="node-sub" x="900" y="706" text-anchor="middle">decision feels final or opaque</text>
+
+        <polygon class="diamond" points="900,1060 1240,1135 900,1210 560,1135" fill="#fffaf3" stroke="#b8afa3" />
+        <text class="node-title" x="900" y="1126" text-anchor="middle">What route next?</text>
+        <text class="node-sub" x="900" y="1152" text-anchor="middle">accept · contest · evade</text>
+
+        <g>
+          <rect class="label-bg" x="220" y="1103" width="160" height="30" rx="15" />
+          <text class="label-text" x="300" y="1123" text-anchor="middle">accept and leave</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="812" y="1235" width="176" height="30" rx="15" />
+          <text class="label-text" x="900" y="1255" text-anchor="middle">keep contesting</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="1354" y="1103" width="192" height="30" rx="15" />
+          <text class="label-text" x="1450" y="1123" text-anchor="middle">workaround spaces</text>
+        </g>
+
+        <rect class="node" x="90" y="1300" width="420" height="150" rx="18" fill="#eee9fb" stroke="#5e409d" />
+        <text class="node-title" x="300" y="1340" text-anchor="middle" fill="#4b3480">In-person advocator</text>
+        <text class="node-sub" x="300" y="1370" text-anchor="middle">rejects app-first dating</text>
+        <text class="node-sub" x="300" y="1395" text-anchor="middle">frames ban as a sign</text>
+        <text class="node-sub" x="300" y="1420" text-anchor="middle">to meet people offline</text>
+
+        <rect class="node" x="670" y="1300" width="460" height="155" rx="18" fill="#e2f1ef" stroke="#24837b" />
+        <text class="node-title" x="900" y="1340" text-anchor="middle" fill="#17645e">Persistent appealer</text>
+        <text class="node-sub" x="900" y="1370" text-anchor="middle">keeps escalating with appeals,</text>
+        <text class="node-sub" x="900" y="1395" text-anchor="middle">complaints, DMs, and new evidence</text>
+        <text class="node-sub" x="900" y="1420" text-anchor="middle">sometimes reinstated; often burns out</text>
+
+        <rect class="node" x="1230" y="1300" width="440" height="150" rx="18" fill="#f7e6e3" stroke="#af3029" />
+        <text class="node-title" x="1450" y="1340" text-anchor="middle" fill="#81231e">The hacker</text>
+        <text class="node-sub" x="1450" y="1370" text-anchor="middle">tries to re-enter with separated</text>
+        <text class="node-sub" x="1450" y="1395" text-anchor="middle">identity, device, payment, or media signals</text>
+        <text class="node-sub" x="1450" y="1420" text-anchor="middle">avoids verification and durable traces</text>
+
+        <polygon class="diamond" points="1450,1520 1675,1585 1450,1650 1225,1585" fill="#fffaf3" stroke="#b8afa3" />
+        <text class="node-title" x="1450" y="1579" text-anchor="middle">Re-entry succeeds?</text>
+        <text class="node-sub" x="1450" y="1604" text-anchor="middle">outcome of attempted return</text>
+
+        <g>
+          <rect class="label-bg" x="1230" y="1613" width="58" height="30" rx="15" />
+          <text class="label-text" x="1259" y="1633" text-anchor="middle">yes</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="1614" y="1613" width="92" height="30" rx="15" />
+          <text class="label-text" x="1660" y="1633" text-anchor="middle">detected</text>
+        </g>
+
+        <rect class="node" x="1050" y="1710" width="420" height="110" rx="18" fill="#f7e3ed" stroke="#a02f6f" />
+        <text class="node-title" x="1260" y="1750" text-anchor="middle" fill="#7f2759">Hard reset advocator</text>
+        <text class="node-sub" x="1260" y="1780" text-anchor="middle">turns successful evasion into advice</text>
+        <text class="node-sub" x="1260" y="1805" text-anchor="middle">and tells others to skip appeals</text>
+
+        <rect class="node" x="1490" y="1710" width="290" height="110" rx="18" fill="#fbf6e8" stroke="#9f9688" />
+        <text class="node-title" x="1635" y="1750" text-anchor="middle">Re-ban cycle</text>
+        <text class="node-sub" x="1635" y="1780" text-anchor="middle">detected re-entry</text>
+        <text class="node-sub" x="1635" y="1805" text-anchor="middle">returns to start</text>
+
+        <!-- loop labels -->
+        <g>
+          <rect class="label-bg" x="450" y="1235" width="182" height="30" rx="15" />
+          <text class="label-text" x="541" y="1255" text-anchor="middle">repeat appeal loop</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="392" y="644" width="234" height="30" rx="15" />
+          <text class="label-text" x="509" y="664" text-anchor="middle">community redirect</text>
+        </g>
+        <g>
+          <rect class="label-bg" x="1365" y="23" width="212" height="30" rx="15" />
+          <text class="label-text" x="1471" y="43" text-anchor="middle">cycle back after re-ban</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+<section id="personas" aria-labelledby="personas-heading">
+      <div class="section-head">
+        <div class="section-number">02 / Profiles</div>
+        <div>
+          <h2 id="personas-heading">Six anti-user profiles</h2>
+          <p class="section-copy">Each persona has a different psychological profile and behavioral fingerprint. The useful distinction is not just what they do, but how they explain the ban to themselves.</p>
+        </div>
+      </div>
+
+      <div class="persona-grid">
+        <article class="card green">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The persistent appealer</h3><span class="tag">Confident in innocence</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>Believes the ban was triggered by automation or a mistaken report.</li>
+              <li>Convinced they did nothing wrong.</li>
+              <li>Frames the platform decision as automated and correctable.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+              <li>Sends earnest appeal emails and stays persistent.</li>
+              <li>Files a complaint through BBB if the appeal fails.</li>
+              <li>Believes appeal works for "normal" cases, once it works for them. </li>
+              <li>Often judges people for taking the hacker route.</li>
+              
+            </ul>
+            <div class="outcome">Outcome: sometimes reinstated if persistent</div>
+          </div>
+        </article>
+
+        <article class="card blue">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The perpetual victim</h3><span class="tag">Feels wronged, says lost</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>Genuinely unsure why they were banned.</li>
+              <li>Believes the platform or other users acted unfairly.</li>
+              <li>Thinks reporting standards are arbitrary.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+              <li>Vents on Reddit, TikTok, Instagram, or similar spaces.</li>
+              <li>Looks for people with similar stories.</li>
+              <li>May not actually appeal, remaining stuck in complaint mode.</li>
+            </ul>
+            <div class="outcome">Outcome: usually stays banned</div>
+          </div>
+        </article>
+
+        <article class="card red">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The hacker</h3><span class="tag">Determined to bypass</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>Has tried appeals and believes they will not work.</li>
+              <li>Willing to spend money or effort to regain access.</li>
+              <li>Sometimes aware of the behavior that likely triggered the ban.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+                <li>Uses new phone (Preferably Android)  or  a secure folder and different Play Store account</li>
+                <li>Uses new phone number, new email, new app store account</li>
+                <li>Avoids using identical pictures (modify them by rotating, screenshotting, add drawings or other modifications in part of the picture that is not visible once uploaded)</li>
+                <li>No personal information or credit card details</li>
+            <p>This can cost somewhere around <strong>$100–$150</strong>, but it is generally considered to be successful.</p>
+
+            <p>
+            Sites like
+            <a href="https://datingzest.com/" target="_blank" rel="noopener noreferrer">DatingZest</a>
+            and
+            <a href="https://www.unbannedhinge.com/" target="_blank" rel="noopener noreferrer">UnbannedHinge</a>
+            offer services to help with this process.
+            </p>
+            </ul>
+            <div class="outcome">Outcome: often gets back in, but may face repeated bans</div>
+          </div>
+        </article>
+
+        <article class="card orange">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The give up-er</h3><span class="tag">Accepts defeat quietly</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>May or may not know why they were banned.</li>
+              <li>Does nothing if they know the reason.</li>
+              <li>Tries one appeal, then accepts the outcome.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+              <li>Sends maybe one email, then moves on.</li>
+              <li>Migrates to other dating apps or stops using apps entirely.</li>
+              <li>Does not relitigate the ban publicly.</li>
+            </ul>
+            <div class="outcome">Outcome: exits the platform</div>
+          </div>
+        </article>
+
+        <article class="card purple">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The in-person advocator</h3><span class="tag">Rejects app-first dating</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>Gave up after appeals were denied.</li>
+              <li>Uses the ban as a catalyst for change.</li>
+              <li>Often had a mediocre experience before the ban.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+              <li>Advocates for meeting people in person.</li>
+              <li>Frames the ban as a sign to leave app dating.</li>
+              <li>May post about the shift as a lifestyle change.</li>
+            </ul>
+            <div class="outcome">Outcome: leaves the app ecosystem</div>
+          </div>
+        </article>
+
+        <article class="card pink">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="mark">□</div>
+              <div><h3>The hard reset advocator</h3><span class="tag">Evangelist of the workaround</span></div>
+            </div>
+            <p class="mini-heading">Who they are</p>
+            <ul>
+              <li>Successfully returned after using an evasion pathway.</li>
+              <li>Met people on the platform after re-entry.</li>
+              <li>Now believes appealing is a waste of time.</li>
+            </ul>
+            <p class="mini-heading">What they do</p>
+            <ul>
+              <li>Promotes workaround narratives on social platforms.</li>
+              <li>Tells newcomers to skip the appeal route.</li>
+              <li>Unmatches frequently, avoids verification, and stays paranoid about a re-ban.</li>
+            </ul>
+            <div class="outcome">Outcome: back in, but cautious</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="signals" aria-labelledby="signals-heading">
+      <div class="section-head">
+        <div class="section-number">03 / Tracking</div>
+        <div>
+          <h2 id="signals-heading">Post-ban signals worth tracking</h2>
+          <p class="section-copy">The downstream behavior matters because a bad appeal experience can reshape the user’s risk appetite after reinstatement, even when the original ban was a false positive.</p>
+        </div>
+      </div>
+
+      <div class="signal-grid">
+        <article class="signal">
+          <h3>Reporting others post-reinstatement</h3>
+          <p>Reporting profiles that they have interacted with before through likes, matches, or messages
+            because they assume the other person was responsible for their ban. This can be a sign of a user who is still frustrated and looking for someone to blame.
+          </p>
+        </article>
+        <article class="signal">
+          <h3>Unmatching aggressively</h3>
+          <p>Unmatch with people even if the conversation has shifted to another platform and is going well.
+            Also unmatch with people if the initial vibes is off so they can avoid any potential risk of being reported again. 
+            This can be a sign of a user who is still paranoid and looking to avoid any potential risk of being banned again.
+          </p>
+        </article>
+        <article class="signal">
+          <h3>Avoiding verification</h3>
+          <p>Avoid verification processes to prevent detection and potential re-ban. 
+            Avoid in app facial verification, or ID verification done through Jumio</p>
+        </article>
+        <article class="signal">
+          <h3>Heavy self-censorship</h3>
+          <p>Users may avoid normal conversation because they fear anything remotely offensive could trigger another ban.
+            The general thought process is that people are "too sensitive" and that they need to be extra careful with their words and actions. 
+          </p>
+        </article>
+      </div>
+    </section>
+
+   
+</body>
+</html>
