@@ -3,7 +3,7 @@
 **Aaradhyaa Gyawali** — Cornell Information Science
 
 
-**→ Live at [aaradhyaa717.github.io/portfolio](https://aaradhyaa717.github.io/portfolio)**
+**→ Live at [aaradhyaa717.github.io/profile](https://aaradhyaa717.github.io/profile)**
 
 ---
 
